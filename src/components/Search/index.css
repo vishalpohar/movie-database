@@ -1,0 +1,27 @@
+.input-wrapper {
+  flex: 1;
+  min-width: 140px;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 3px solid lightgray;
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin: 0px auto;
+}
+
+.search-input {
+  flex: 1;
+  border: 0px;
+  outline: none;
+  cursor: pointer;
+}
+
+.input-wrapper:focus-within {
+  border: 3px solid rgb(255, 109, 109);
+}
+
+.search-btn {
+  color: rgb(181, 181, 181);
+}

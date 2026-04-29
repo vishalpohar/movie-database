@@ -11,6 +11,7 @@ import popularMoviesReducer from './slices/popularMoviesSlice'
 import topRatedMoviesReducer from './slices/topRatedMoviesSlice'
 import upcomingMoviesReducer from './slices/upcomingMoviesSlice'
 import searchedMoviesReducer from './slices/searchedMoviesSlice'
+import movieDetailsReducer from './slices/movieDetailsSlice'
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     topRatedMoviesData: topRatedMoviesReducer,
     upcomingMoviesData: upcomingMoviesReducer,
     searchedMoviesData: searchedMoviesReducer,
+    movieDetailsData: movieDetailsReducer,
   },
 })
 

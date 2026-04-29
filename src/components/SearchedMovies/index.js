@@ -24,13 +24,13 @@ const SearchedMovies = props => {
   const handleNext = () => setPage(prev => prev + 1)
   const handlePrevious = () => setPage(prev => (prev - 1 > 0 ? prev - 1 : 1))
 
-  useEffect(() => {
-    const {location} = props
-    const params = new URLSearchParams(location.search)
-    const movieName = params.get('query')
+  const {location} = props
+  const params = new URLSearchParams(location.search)
+  const movieName = params.get('query')
 
+  useEffect(() => {
     dispatch(getSearchedMovies({movieName, page}))
-  }, [dispatch, page])
+  }, [dispatch, page, movieName])
 
   const renderLoading = () => (
     <div className="loader-container" data-testid="loading">

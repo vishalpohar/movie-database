@@ -1,10 +1,12 @@
 import {useState, useEffect} from 'react'
+import {useDispatch, useSelector} from 'react-redux'
 import Loader from 'react-loader-spinner'
 
-import './index.css'
+import {getSearchedMovies} from '../../redux/slices/searchedMoviesSlice'
 
 import MovieItem from '../MovieItem'
-import Search from '../Search'
+
+import './index.css'
 
 const apiConstants = {
   initial: 'INITIAL',
@@ -14,39 +16,21 @@ const apiConstants = {
 }
 
 const SearchedMovies = props => {
-  const [apiStatus, setApiStatus] = useState(apiConstants.initial)
+  const dispatch = useDispatch()
   const [page, setPage] = useState(1)
-  const [searchedMovies, setSearchedMovies] = useState([])
-  const apiKey = 'bcbb77a91c4be4ef5538befb53c81b3b'
+
+  const {movies, apiStatus} = useSelector(state => state.searchedMoviesData)
 
   const handleNext = () => setPage(prev => prev + 1)
   const handlePrevious = () => setPage(prev => (prev - 1 > 0 ? prev - 1 : 1))
 
   useEffect(() => {
-    const fetchSearchedMovies = async () => {
-      setApiStatus(apiConstants.loading)
-      const {location} = props
-      const movieName = decodeURIComponent(location.search.split('=')[1])
-      const response = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=en-US&query=${movieName}&page=${page}`,
-      )
+    const {location} = props
+    const params = new URLSearchParams(location.search)
+    const movieName = params.get('query')
 
-      if (response.ok) {
-        const data = await response.json()
-        const stucturedData = data.results.map(item => ({
-          id: item.id,
-          title: item.title,
-          posterPath: item.poster_path,
-          rating: item.vote_average,
-        }))
-        setSearchedMovies(stucturedData)
-        setApiStatus(apiConstants.success)
-      } else {
-        setApiStatus(apiConstants.failure)
-      }
-    }
-    fetchSearchedMovies()
-  }, [page])
+    dispatch(getSearchedMovies({movieName, page}))
+  }, [dispatch, page])
 
   const renderLoading = () => (
     <div className="loader-container" data-testid="loading">
@@ -57,28 +41,10 @@ const SearchedMovies = props => {
   const renderSuccess = () => (
     <>
       <div className="page-container">
-        <Search />
         <div className="search-results grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {searchedMovies.map(movieDetails => (
+          {movies.map(movieDetails => (
             <MovieItem key={movieDetails.id} movieDetails={movieDetails} />
           ))}
-
-          <div className="pagination-controls">
-            <button
-              type="button"
-              className="btn control-btn"
-              onClick={handlePrevious}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              className="btn control-btn"
-              onClick={handleNext}
-            >
-              Next
-            </button>
-          </div>
         </div>
       </div>
     </>
@@ -90,16 +56,45 @@ const SearchedMovies = props => {
     </div>
   )
 
-  switch (apiStatus) {
-    case apiConstants.loading:
-      return renderLoading()
-    case apiConstants.success:
-      return renderSuccess()
-    case apiConstants.failure:
-      return renderFailure()
-    default:
-      return null
+  const renderContent = () => {
+    switch (apiStatus) {
+      case apiConstants.loading:
+        return renderLoading()
+      case apiConstants.success:
+        return renderSuccess()
+      case apiConstants.failure:
+        return renderFailure()
+      default:
+        return null
+    }
   }
+
+  return (
+    <>
+      {renderContent()}
+      <div className="pagination-controls">
+        <button
+          type="button"
+          className="btn control-btn"
+          data-testid="prev"
+          aria-label="Prev"
+          onClick={handlePrevious}
+        >
+          Prev
+        </button>
+        <p className="page-number">{page}</p>
+        <button
+          type="button"
+          className="btn control-btn"
+          data-testid="next"
+          aria-label="Next"
+          onClick={handleNext}
+        >
+          Next
+        </button>
+      </div>
+    </>
+  )
 }
 
 export default SearchedMovies

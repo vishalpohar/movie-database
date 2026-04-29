@@ -1,10 +1,12 @@
 import {useState, useEffect} from 'react'
+import {useDispatch, useSelector} from 'react-redux'
 import Loader from 'react-loader-spinner'
+
+import {getTopRatedMovies} from '../../redux/slices/topRatedMoviesSlice'
 
 import './index.css'
 
 import MovieItem from '../MovieItem'
-import Search from '../Search'
 
 const apiConstants = {
   initial: 'INITIAL',
@@ -14,37 +16,16 @@ const apiConstants = {
 }
 
 const TopRatedMovies = () => {
-  const [apiStatus, setApiStatus] = useState(apiConstants.initial)
+  const dispatch = useDispatch()
   const [page, setPage] = useState(1)
-  const [popularMovies, setPopularMovies] = useState([])
+  const {movies, apiStatus} = useSelector(state => state.topRatedMoviesData)
 
   const handleNext = () => setPage(prev => prev + 1)
   const handlePrevious = () => setPage(prev => (prev - 1 > 0 ? prev - 1 : 1))
 
-  const apiKey = 'bcbb77a91c4be4ef5538befb53c81b3b'
   useEffect(() => {
-    const fetchPopularMovies = async () => {
-      setApiStatus(apiConstants.loading)
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}&language=en-US&page=${page}`,
-      )
-
-      if (response.ok) {
-        const data = await response.json()
-        const stucturedData = data.results.map(item => ({
-          id: item.id,
-          title: item.title,
-          posterPath: item.poster_path,
-          rating: item.vote_average,
-        }))
-        setPopularMovies(stucturedData)
-        setApiStatus(apiConstants.success)
-      } else {
-        setApiStatus(apiConstants.failure)
-      }
-    }
-    fetchPopularMovies()
-  }, [page])
+    dispatch(getTopRatedMovies(page))
+  }, [dispatch, page])
 
   const renderLoading = () => (
     <div className="loader-container" data-testid="loading">
@@ -55,23 +36,10 @@ const TopRatedMovies = () => {
   const renderSuccess = () => (
     <>
       <h1 className="page-title">Top Rated</h1>
-      <Search />
       <div className="page-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-        {popularMovies.map(movieDetails => (
+        {movies.map(movieDetails => (
           <MovieItem key={movieDetails.id} movieDetails={movieDetails} />
         ))}
-      </div>
-      <div className="pagination-controls">
-        <button
-          type="button"
-          className="btn control-btn"
-          onClick={handlePrevious}
-        >
-          Previous
-        </button>
-        <button type="button" className="btn control-btn" onClick={handleNext}>
-          Next
-        </button>
       </div>
     </>
   )
@@ -82,16 +50,45 @@ const TopRatedMovies = () => {
     </div>
   )
 
-  switch (apiStatus) {
-    case apiConstants.loading:
-      return renderLoading()
-    case apiConstants.success:
-      return renderSuccess()
-    case apiConstants.failure:
-      return renderFailure()
-    default:
-      return null
+  const renderContent = () => {
+    switch (apiStatus) {
+      case apiConstants.loading:
+        return renderLoading()
+      case apiConstants.success:
+        return renderSuccess()
+      case apiConstants.failure:
+        return renderFailure()
+      default:
+        return null
+    }
   }
+
+  return (
+    <>
+      {renderContent()}
+      <div className="pagination-controls">
+        <button
+          type="button"
+          className="btn control-btn"
+          data-testid="prev"
+          aria-label="Prev"
+          onClick={handlePrevious}
+        >
+          Prev
+        </button>
+        <p className="page-number">{page}</p>
+        <button
+          type="button"
+          className="btn control-btn"
+          data-testid="next"
+          aria-label="Next"
+          onClick={handleNext}
+        >
+          Next
+        </button>
+      </div>
+    </>
+  )
 }
 
 export default TopRatedMovies

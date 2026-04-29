@@ -10,6 +10,7 @@
 .pagination-controls {
   display: flex;
   justify-content: space-around;
+  align-items: center;
   padding: 10px 0px 20px 0px;
 }
 
@@ -19,6 +20,12 @@
   border: 1px solid red;
   border-radius: 20px;
   padding: 10px 16px;
+}
+
+.page-number {
+  color: red;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 /* Loader */
